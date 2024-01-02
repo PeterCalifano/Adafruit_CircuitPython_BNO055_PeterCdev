@@ -20,13 +20,16 @@ import time
 import board
 import busio
 import flask
+import serial
 
 import adafruit_bno055
 
-i2c = busio.I2C(board.SCL, board.SDA)
+#i2c = busio.I2C(board.SCL, board.SDA)
 
+BAUDRATE = 115200
+UART_link = serial.Serial("/dev/serial0", BAUDRATE)
 # Create the BNO sensor connection.
-bno = adafruit_bno055.BNO055_I2C(i2c)
+bno = adafruit_bno055.BNO055_UART(UART_link)
 
 # Application configuration below.  You probably don't need to change these values.
 

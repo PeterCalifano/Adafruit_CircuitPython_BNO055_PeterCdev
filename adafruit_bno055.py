@@ -222,6 +222,7 @@ class BNO055:  # pylint: disable=too-many-public-methods
 
     def __init__(self) -> None:
         chip_id = self._read_register(_ID_REGISTER)
+        print(chip_id)
         if chip_id != _CHIP_ID:
             raise RuntimeError(f"bad chip id ({chip_id:#x} != {_CHIP_ID:#x})")
         self._reset()
