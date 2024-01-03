@@ -23,7 +23,7 @@ hours2sec = 3600.0
 LOG_TIME = ceil(hours2sec * 1) # [hr]
 BNO_UPDATE_FREQUENCY_HZ = 1 #Reading frequency
 LOGFILE_DIR = ''
-LOGGILE_NAME = 'BN055_IMUdata_LOG'
+LOGGILE_NAME = 'BN055_IMUdata_LOG.csv'
 
 LOGFILE_PATH = os.path.join(LOGFILE_DIR, LOGGILE_NAME)
 
