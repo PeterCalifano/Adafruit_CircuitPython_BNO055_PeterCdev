@@ -1,3 +1,8 @@
+# Script to read and write BNO055 IMU data to CSV file
+# Author: Pietro Califano
+# Date of creation: 03/01/2024
+# Derived from Adafruit Python sensor library
+
 import board
 import busio
 import adafruit_bno055
