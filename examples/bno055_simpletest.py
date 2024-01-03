@@ -7,15 +7,15 @@ import serial
 import adafruit_bno055
 
 
-#i2c = board.I2C()  # uses board.SCL and board.SDA
+i2c = board.I2C()  # uses board.SCL and board.SDA
 # i2c = board.STEMMA_I2C()  # For using the built-in STEMMA QT connector on a microcontroller
-#sensor = adafruit_bno055.BNO055_I2C(i2c)
+sensor = adafruit_bno055.BNO055_I2C(i2c)
 
 # If you are going to use UART uncomment these lines
 BAUDRATE = 115200
 
-uart = serial.Serial("/dev/serial0", BAUDRATE)
-sensor = adafruit_bno055.BNO055_UART(uart)
+#uart = serial.Serial("/dev/serial0", BAUDRATE)
+#sensor = adafruit_bno055.BNO055_UART(uart)
 
 last_val = 0xFFFF
 
@@ -29,7 +29,6 @@ def temperature():
             return 0b00111111 & result
     last_val = result
     return result
-
 
 while True:
     print("Temperature: {} degrees C".format(sensor.temperature))
@@ -47,4 +46,4 @@ while True:
     print("Gravity (m/s^2): {}".format(sensor.gravity))
     print()
 
-    time.sleep(1)
+    time.sleep(0.1)
