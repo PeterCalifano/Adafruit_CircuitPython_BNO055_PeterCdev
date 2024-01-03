@@ -1,0 +1,126 @@
+import board
+import busio
+import adafruit_bno055
+import time
+import csv
+import os 
+from math import (floor, ceil)
+
+#import sys
+#sys.path.append('/home/peterc/devDir/codeRepoPeterC/python/TimersModule.py')
+#import TimersModule
+
+# Create BNO sensor connection via I2C
+i2c_link = busio.I2C(board.SCL, board.SDA)
+BN055sensor = adafruit_bno055.BNO055_I2C(i2c_link)
+
+# Create BNO sensor connection via UART
+#BAUDRATE = 115200
+#UART_link = serial.Serial("/dev/serial0", BAUDRATE)
+#BN055sensor = adafruit_bno055.BNO055_UART(UART_link)
+
+hours2sec = 3600.0
+LOG_TIME = ceil(hours2sec * 1) # [hr]
+BNO_UPDATE_FREQUENCY_HZ = 1 #Reading frequency
+LOGFILE_DIR = ''
+LOGGILE_NAME = 'BN055_IMUdata_LOG'
+
+LOGFILE_PATH = os.path.join(LOGFILE_DIR, LOGGILE_NAME)
+
+def readIMUData_BN055(BN055sensor, IMUdata):
+
+    # Read data from BN055sensor instance
+    (eulerX, eulerY, eulerZ) = BN055sensor.euler
+    IMUdata["eulerX"] = eulerX
+    IMUdata["eulerY"] = eulerY
+    IMUdata["eulerZ"] = eulerZ
+
+    (lin_accelX, lin_accelY, lin_accelZ) = BN055sensor.linear_acceleration
+    IMUdata["lin_accelX"] = lin_accelX
+    IMUdata["lin_accelY"] = lin_accelY
+    IMUdata["lin_accelZ"] = lin_accelZ
+
+    (accelX, accelY, accelZ) = BN055sensor.acceleration
+    IMUdata["accelX"] = accelX
+    IMUdata["accelY"] = accelY
+    IMUdata["accelZ"] = accelZ
+
+    (magX, magY, magZ) = BN055sensor.magnetic
+    IMUdata["magX"] = magX
+    IMUdata["magY"] = magY
+    IMUdata["magZ"] = magZ
+
+    (gyrosX, gyrosY, gyrosZ) = BN055sensor.gyro
+    IMUdata["gyrosX"] = gyrosX
+    IMUdata["gyrosY"] = gyrosY
+    IMUdata["gyrosZ"] = gyrosZ
+
+    #IMUdata["temp"] = BN055sensor.temperature
+    #IMUdata["calibration"] = BN055sensor.calibration_status
+    return IMUdata
+
+def writeIMUData_BN055(IMUdata, LOGFILE_PATH):
+    FILE_JUST_CREATED=False
+    # Check if file exists
+    if not(os.path.exists(LOGFILE_PATH)):
+        # Open/Create csv file
+        outputFile = open(LOGFILE_PATH, "w")
+        FILE_JUST_CREATED=True
+    else: 
+        # File exists --> Append
+        outputFile = open(LOGFILE_PATH, "a")
+
+    # For csv file
+    csvFileWriter = csv.writer(outputFile)
+
+    if FILE_JUST_CREATED:
+        # Write headers
+        headers = IMUdata.keys()
+        csvFileWriter.writerow(headers) # If empty write headers
+
+    values = IMUdata.values() # Convert dictionary to lists
+    csvFileWriter.writerow(values) # Write data to file
+
+    # Close csv file
+    outputFile.close()
+
+    return 0
+
+def main():   
+    IMUdata = {} # Data dictionary
+    elapsed_time = 0.0 # [s]
+    SleepTime = 1.0 / BNO_UPDATE_FREQUENCY_HZ
+
+    startTime = time.time() # Time since January 1, 1970
+    print_counter = 0
+    PRINT_DELTA_TIME = BNO_UPDATE_FREQUENCY_HZ/10
+
+    # Create output file path if not existing
+    # outputFilePath = os.makedirs()
+    print('DATA LOGGING STARTED')
+    print('LOG_TIME: ', LOG_TIME, 'seconds')
+
+    while elapsed_time <= LOG_TIME:
+        IMUdata['Timetag'] = startTime + elapsed_time
+        # Read and Write data to dictionary
+        IMUdata = readIMUData_BN055(BN055sensor, IMUdata)
+
+       # Time writing to file routine and subtract to SleepTime (rough method)
+        timeInit = time.perf_counter()
+        writeIMUData_BN055(IMUdata, LOGFILE_PATH)
+        writingTime = time.perf_counter() - timeInit
+
+        # Wait time to have (roughly) the desired reading frequency
+        elapsed_time += (SleepTime-writingTime)
+        time.sleep(SleepTime-writingTime)
+        print_counter += SleepTime
+
+        if print_counter >= PRINT_DELTA_TIME:
+            print('OK after', floor(elapsed_time), '[s]')
+            print_counter = 0
+
+    return 0
+
+if __name__ == '__main__':
+    # Run script as main
+    main()
