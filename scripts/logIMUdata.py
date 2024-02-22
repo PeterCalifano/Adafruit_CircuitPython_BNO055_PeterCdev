@@ -82,7 +82,7 @@ def readIMUData_BN055(BN055sensor, IMUdata, IMUdataUnits):
 
     #IMUdata["temp"] = BN055sensor.temperature
     #IMUdata["calibration"] = BN055sensor.calibration_status
-    return IMUdata
+    return IMUdata, IMUdataUnits
 
 def writeIMUData_BN055(IMUdata, LOGFILE_PATH, IMUdataUnits={}):
     FILE_JUST_CREATED=False
